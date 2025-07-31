@@ -19,6 +19,8 @@ import {
 } from '../store/reducers/cartReducer';
 import { singleProduct } from '../store/reducers/productReducer';
 import { RootState } from '../store/store';
+import SaleDropDown from '../customComponents/SaleDropDown';
+import QuantitySelector from '../customComponents/QuantitySelector';
 
 const { width, height } = Dimensions.get('window');
 const CARD_MARGIN = 10;
@@ -152,13 +154,13 @@ const CartScreen: React.FC = () => {
                   : productName}
               </Text>
 
-              <SimpleDropDown />
+              <QuantitySelector item={item} />
 
               <View style={styles.priceRow}>
                 <Text style={styles.sellingPrice}>₹{productPrice}</Text>
                 <Text style={styles.mrp}>{mrpPrice}</Text>
               </View>
-              <SimpleDropDown />
+              <SaleDropDown />
               {/* <View style={styles.actionsRow}>
                 <TouchableOpacity style={styles.wishlistButton}>
                  </TouchableOpacity>

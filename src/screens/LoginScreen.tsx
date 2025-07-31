@@ -23,7 +23,6 @@ const LoginScreen: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<NavigationProp>();
   const user = useSelector((state: RootState) => state?.auth?.user);
-  console.log(user, 'I got the user');
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
@@ -37,7 +36,6 @@ const LoginScreen: React.FC = () => {
     try {
       await GoogleSignin.hasPlayServices();
 
-      // Sign in directly
       const userInfo = await GoogleSignin.signIn();
 
       if (userInfo?.data?.user) {

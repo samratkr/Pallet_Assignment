@@ -5,6 +5,10 @@ import { Dropdown } from 'react-native-element-dropdown';
 const data = [
   { label: '1 Quantity', value: '1' },
   { label: '2 Quantity', value: '2' },
+  { label: '3 Quantity', value: '3' },
+  { label: '4 Quantity', value: '4' },
+  { label: '5 Quantity', value: '5' },
+  { label: '6 Quantity', value: '6' },
 ];
 
 export default function SimpleDropDown() {

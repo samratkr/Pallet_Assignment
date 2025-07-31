@@ -64,27 +64,6 @@ const ProductListScreen = () => {
     );
   };
 
-  const viewabilityConfig = {
-    itemVisiblePercentThreshold: 50,
-  };
-
-  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
-    const lastIndex = products.length - 1;
-    const isLastVisible = viewableItems.some(
-      (item: any) => item.index === lastIndex,
-    );
-
-    if (isLastVisible && hasMore && !loading) {
-      dispatch(
-        GetProductApiHelper({
-          page: page.toString(),
-          pageSize: '10',
-          storeLocationId: 'RLC_83',
-        }),
-      );
-    }
-  });
-
   const handleViewCard = () => {
     navigation.navigate('Cart');
   };
@@ -132,8 +111,17 @@ const ProductListScreen = () => {
         contentContainerStyle={{
           paddingVertical: CARD_MARGIN * 2,
         }}
-        onViewableItemsChanged={onViewableItemsChanged.current}
-        viewabilityConfig={viewabilityConfig}
+        onEndReachedThreshold={0.8}
+        onEndReached={() => {
+          console.log('Reached end of list');
+          dispatch(
+            GetProductApiHelper({
+              page: page.toString(),
+              pageSize: '10',
+              storeLocationId: 'RLC_83',
+            }),
+          );
+        }}
         ListFooterComponent={
           loading && hasMore ? (
             <Loader size="small" background={false} />

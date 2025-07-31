@@ -19,6 +19,9 @@ import {
 } from '../store/reducers/cartReducer';
 import { AppDispatch, RootState } from '../store/store';
 import { useNavigation } from '@react-navigation/native';
+import SimpleDropDown from '../customComponents/SimpleDropDown';
+import SaleDropDown from '../customComponents/SaleDropDown';
+import QuantitySelector from '../customComponents/QuantitySelector';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProductDetails'>;
 
@@ -114,6 +117,9 @@ const ProductDetailsScreen = () => {
         <Text style={styles.name}>{productName}</Text>
         <Text style={styles.price}>₹{productPrice}</Text>
         <Text style={styles.description}>{description}</Text>
+
+        <QuantitySelector item={product} />
+        <SaleDropDown />
         {quantity === 0 ? (
           <TouchableOpacity
             style={[
@@ -174,7 +180,8 @@ const ProductDetailsScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    paddingHorizontal: width * 0.05,
+    paddingVertical: 16,
     height: height * 0.92,
     paddingBottom: 40,
     backgroundColor: '#f9f9f9',
@@ -317,6 +324,7 @@ const styles = StyleSheet.create({
     borderColor: '#d63333ff',
     alignItems: 'center',
     width: width * 0.9,
+    alignSelf: 'center',
     justifyContent: 'center',
   },
   cartText: {

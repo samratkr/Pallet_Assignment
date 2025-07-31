@@ -17,6 +17,8 @@ import {
 import { singleProduct } from '../store/reducers/productReducer';
 import { AppDispatch } from '../store/store';
 import SimpleDropDown from './SimpleDropDown';
+import SaleDropDown from './SaleDropDown';
+import QuantitySelector from './QuantitySelector';
 
 const { width, height } = Dimensions.get('window');
 
@@ -107,59 +109,73 @@ const ListComponent = ({ item, quantityMap }: any) => {
               : productName}
           </Text>
 
-          <SimpleDropDown />
+          {/* <SimpleDropDown /> */}
+          <QuantitySelector item={item} />
 
           <View style={styles.priceRow}>
             <Text style={styles.sellingPrice}>₹{productPrice}</Text>
             <Text style={styles.mrp}>{mrpPrice}</Text>
           </View>
 
-          <SimpleDropDown />
+          <SaleDropDown />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+          >
+            <View style={styles.saveIconContainer}>
+              <Image
+                source={require('../../assets/images/save_icon.png')}
+                style={styles.saveIconImage}
+              />
+            </View>
 
-          {quantity === 0 ? (
-            <TouchableOpacity
-              style={[
-                styles.addToCartButton,
-                !item?.inStock && { borderColor: '#eee' },
-              ]}
-              disabled={!mrpPrice && !productPrice}
-              onPress={() => {
-                handleIncrement(item);
-              }}
-            >
-              <Text
-                style={[styles.cartText, !item?.inStock && { color: '#eee' }]}
-              >
-                Add
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.counterContainer}>
+            {quantity === 0 ? (
               <TouchableOpacity
-                style={styles.counterButton}
-                onPress={() => {
-                  if (quantity === 1) {
-                    dispatch(removeFromCart(item?.productId));
-                  } else {
-                    handleDecrement(item);
-                  }
-                }}
-              >
-                <Text style={styles.counterText}>-</Text>
-              </TouchableOpacity>
-
-              <Text style={styles.counterValue}>{quantity}</Text>
-
-              <TouchableOpacity
-                style={styles.counterButton}
+                style={[
+                  styles.addToCartButton,
+                  !item?.inStock && { borderColor: '#eee' },
+                ]}
+                disabled={!mrpPrice && !productPrice}
                 onPress={() => {
                   handleIncrement(item);
                 }}
               >
-                <Text style={styles.counterText}>+</Text>
+                <Text
+                  style={[styles.cartText, !item?.inStock && { color: '#eee' }]}
+                >
+                  Add
+                </Text>
               </TouchableOpacity>
-            </View>
-          )}
+            ) : (
+              <View style={styles.counterContainer}>
+                <TouchableOpacity
+                  style={styles.counterButton}
+                  onPress={() => {
+                    if (quantity === 1) {
+                      dispatch(removeFromCart(item?.productId));
+                    } else {
+                      handleDecrement(item);
+                    }
+                  }}
+                >
+                  <Text style={styles.counterText}>-</Text>
+                </TouchableOpacity>
+
+                <Text style={styles.counterValue}>{quantity}</Text>
+
+                <TouchableOpacity
+                  style={styles.counterButton}
+                  onPress={() => {
+                    handleIncrement(item);
+                  }}
+                >
+                  <Text style={styles.counterText}>+</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
         </View>
       </View>
     </View>
@@ -288,6 +304,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
+  },
+  saveIconContainer: {
+    height: width * 0.085,
+    width: 40,
+    borderWidth: 2,
+    borderColor: '#151515ff',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  saveIconImage: {
+    width: 18,
+    height: 18,
+    resizeMode: 'contain',
   },
   cartText: {
     color: '#d63333ff',
