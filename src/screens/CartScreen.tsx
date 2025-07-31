@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useRef, useState } from 'react';
 import {
   Dimensions,
@@ -10,12 +11,10 @@ import {
   View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import ListComponent from '../customComponents/ListComponent';
-import { RootState } from '../store/store';
 import SimpleDropDown from '../customComponents/SimpleDropDown';
 import { addToCart } from '../store/reducers/cartReducer';
 import { singleProduct } from '../store/reducers/productReducer';
-import { useNavigation } from '@react-navigation/native';
+import { RootState } from '../store/store';
 
 const { width, height } = Dimensions.get('window');
 const CARD_MARGIN = 10;
@@ -393,7 +392,7 @@ const styles = StyleSheet.create({
   checkOut: {
     position: 'absolute',
     bottom: 30,
-    width: width * 0.95,
+    width: width * 0.92,
     alignSelf: 'center',
   },
   checkOutButton: {
