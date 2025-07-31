@@ -55,13 +55,15 @@ const CartScreen: React.FC = () => {
   };
 
   const renderItem = ({ item }: any) => {
-    const quantity = useSelector((state: any) => {
+    const quantityNum = useSelector((state: any) => {
       return (
         state.cart.items.find(
           (cartItem: any) => cartItem.productId === item.productId,
         )?.quantity || 0
       );
     });
+
+    const [quantity, setQuantity] = useState(quantityNum || 0);
     const productImage =
       item.image || item?.variants?.[0]?.images?.[0]?.url || null;
     const productName = item.name || item.title || 'No Name';
@@ -72,6 +74,7 @@ const CartScreen: React.FC = () => {
       item?.variants[0]?.inventorySync?.mrp ?? productPrice ?? 'N/A';
 
     const handleIncrement = (product: any) => {
+      setQuantity(quantity + 1);
       const newQuantity = product.quantity + 1;
       dispatch(
         updateQuantity({ productId: product.productId, quantity: newQuantity }),
@@ -79,6 +82,7 @@ const CartScreen: React.FC = () => {
     };
 
     const handleDecrement = (product: any) => {
+      setQuantity(quantity - 1);
       const newQuantity = product.quantity - 1;
       if (newQuantity === 0) {
         dispatch(removeFromCart(product.productId));
@@ -196,6 +200,7 @@ const CartScreen: React.FC = () => {
                     style={styles.counterButton}
                     onPress={() => {
                       if (quantity === 1) {
+                        setQuantity(0);
                         dispatch(removeFromCart(item));
                       } else {
                         handleDecrement(item);

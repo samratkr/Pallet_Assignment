@@ -29,13 +29,16 @@ const ProductDetailsScreen = () => {
     (state: RootState) => state?.product?.singleProduct,
   );
 
-  const quantity = useSelector((state: any) => {
+  const quantityNum = useSelector((state: any) => {
     return (
       state.cart.items.find(
         (cartItem: any) => cartItem.productId === product.productId,
       )?.quantity || 0
     );
   });
+
+  const [quantity, setQuantity] = useState(quantityNum || 0);
+
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
   const cartProducts = useSelector((state: RootState) => state?.cart?.items);
@@ -56,6 +59,7 @@ const ProductDetailsScreen = () => {
     product?.variants[0]?.inventorySync?.mrp ?? productPrice ?? 'N/A';
 
   const handleIncrement = (product: any) => {
+    setQuantity(quantity + 1);
     const newQuantity = product.quantity + 1;
     dispatch(
       updateQuantity({ productId: product.productId, quantity: newQuantity }),
@@ -63,6 +67,7 @@ const ProductDetailsScreen = () => {
   };
 
   const handleDecrement = (product: any) => {
+    setQuantity(quantity - 1);
     const newQuantity = product.quantity - 1;
     if (newQuantity === 0) {
       dispatch(removeFromCart(product.productId));
@@ -128,6 +133,7 @@ const ProductDetailsScreen = () => {
               style={styles.counterButton}
               onPress={() => {
                 if (quantity === 1) {
+                  setQuantity(0);
                   dispatch(removeFromCart(product));
                 } else {
                   handleDecrement(product);

@@ -23,13 +23,16 @@ const { width, height } = Dimensions.get('window');
 const ListComponent = ({ item }: any) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation();
-  const quantity = useSelector((state: any) => {
+  const quantityNum = useSelector((state: any) => {
     return (
       state.cart.items.find(
-        (cartItem: any) => cartItem.productId === item.productId,
+        (cartItem: any) => cartItem?.productId === item.productId,
       )?.quantity || 0
     );
   });
+
+  const [quantity, setQuantity] = useState(quantityNum || 0);
+
   const productImage =
     item.image || item?.variants?.[0]?.images?.[0]?.url || null;
   const productName = item.name || item.title || 'No Name';
@@ -39,6 +42,7 @@ const ListComponent = ({ item }: any) => {
     item?.variants[0]?.inventorySync?.mrp ?? productPrice ?? 'N/A';
 
   const handleIncrement = (product: any) => {
+    setQuantity(quantity + 1);
     const newQuantity = product.quantity + 1;
     dispatch(
       updateQuantity({ productId: product.productId, quantity: newQuantity }),
@@ -46,6 +50,7 @@ const ListComponent = ({ item }: any) => {
   };
 
   const handleDecrement = (product: any) => {
+    setQuantity(quantity - 1);
     const newQuantity = product.quantity - 1;
     if (newQuantity === 0) {
       dispatch(removeFromCart(product.productId));
@@ -137,6 +142,7 @@ const ListComponent = ({ item }: any) => {
                 style={styles.counterButton}
                 onPress={() => {
                   if (quantity === 1) {
+                    setQuantity(0);
                     dispatch(removeFromCart(item));
                   } else {
                     handleDecrement(item);
