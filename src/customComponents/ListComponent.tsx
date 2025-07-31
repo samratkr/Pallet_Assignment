@@ -42,16 +42,16 @@ const ListComponent = ({ item }: any) => {
     item?.variants[0]?.inventorySync?.mrp ?? productPrice ?? 'N/A';
 
   const handleIncrement = (product: any) => {
+    const newQuantity = quantity + 1;
     setQuantity(quantity + 1);
-    const newQuantity = product.quantity + 1;
     dispatch(
       updateQuantity({ productId: product.productId, quantity: newQuantity }),
     );
   };
 
   const handleDecrement = (product: any) => {
+    const newQuantity = quantity - 1;
     setQuantity(quantity - 1);
-    const newQuantity = product.quantity - 1;
     if (newQuantity === 0) {
       dispatch(removeFromCart(product.productId));
     } else {
@@ -143,7 +143,7 @@ const ListComponent = ({ item }: any) => {
                 onPress={() => {
                   if (quantity === 1) {
                     setQuantity(0);
-                    dispatch(removeFromCart(item));
+                    dispatch(removeFromCart(item?.productId));
                   } else {
                     handleDecrement(item);
                   }

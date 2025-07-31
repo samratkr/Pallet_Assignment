@@ -59,16 +59,16 @@ const ProductDetailsScreen = () => {
     product?.variants[0]?.inventorySync?.mrp ?? productPrice ?? 'N/A';
 
   const handleIncrement = (product: any) => {
+    const newQuantity = quantity + 1;
     setQuantity(quantity + 1);
-    const newQuantity = product.quantity + 1;
     dispatch(
       updateQuantity({ productId: product.productId, quantity: newQuantity }),
     );
   };
 
   const handleDecrement = (product: any) => {
+    const newQuantity = quantity - 1;
     setQuantity(quantity - 1);
-    const newQuantity = product.quantity - 1;
     if (newQuantity === 0) {
       dispatch(removeFromCart(product.productId));
     } else {
@@ -134,7 +134,7 @@ const ProductDetailsScreen = () => {
               onPress={() => {
                 if (quantity === 1) {
                   setQuantity(0);
-                  dispatch(removeFromCart(product));
+                  dispatch(removeFromCart(product?.productId));
                 } else {
                   handleDecrement(product);
                 }
@@ -158,7 +158,7 @@ const ProductDetailsScreen = () => {
         <View style={styles.viewCart}>
           <TouchableOpacity
             style={[styles.button, styles.viewButton]}
-            onPress={() => dispatch(removeFromCart(product.id))}
+            onPress={() => dispatch(removeFromCart(product.productId))}
           >
             <Text style={styles.viewCartText}>View Cart</Text>
           </TouchableOpacity>

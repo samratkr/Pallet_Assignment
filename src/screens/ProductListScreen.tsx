@@ -36,6 +36,8 @@ const ProductListScreen = () => {
     }
   };
 
+  const cartItems = useSelector((state: any) => state?.cart?.items);
+
   const handleNext = () => {
     const nextIndex = Math.min(currentIndex + 1, products.length - 1);
     scrollToIndex(nextIndex);
@@ -110,12 +112,13 @@ const ProductListScreen = () => {
           loading && hasMore ? <Loader size="small" background={false} /> : null
         }
       />
-
-      <View style={styles.viewCart}>
-        <TouchableOpacity style={styles.viewButton} onPress={handleViewCard}>
-          <Text style={styles.viewCartText}>View Cart</Text>
-        </TouchableOpacity>
-      </View>
+      {cartItems?.length > 0 && (
+        <View style={styles.viewCart}>
+          <TouchableOpacity style={styles.viewButton} onPress={handleViewCard}>
+            <Text style={styles.viewCartText}>View Cart</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };

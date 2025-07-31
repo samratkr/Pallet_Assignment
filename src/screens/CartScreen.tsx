@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -25,7 +25,6 @@ const CARD_MARGIN = 10;
 const CARD_WIDTH = width * 0.65;
 const CartScreen: React.FC = () => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
-  console.error(cartItems);
   const dispatch = useDispatch();
   const flatListRef = useRef<FlatList>(null);
   const navigation = useNavigation();
@@ -35,6 +34,16 @@ const CartScreen: React.FC = () => {
       navigation.navigate('ProductDetails');
     }
   };
+
+  console.error(cartItems?.length, 'cartItemscartItems');
+
+  const quantityMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    cartItems.forEach((item: any) => {
+      map[item?.productId] = item?.quantity;
+    });
+    return map;
+  }, [cartItems]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollToIndex = (index: number) => {
@@ -55,15 +64,8 @@ const CartScreen: React.FC = () => {
   };
 
   const renderItem = ({ item }: any) => {
-    const quantityNum = useSelector((state: any) => {
-      return (
-        state.cart.items.find(
-          (cartItem: any) => cartItem.productId === item.productId,
-        )?.quantity || 0
-      );
-    });
+    const quantity = quantityMap[item?.productId] || 0;
 
-    const [quantity, setQuantity] = useState(quantityNum || 0);
     const productImage =
       item.image || item?.variants?.[0]?.images?.[0]?.url || null;
     const productName = item.name || item.title || 'No Name';
@@ -74,16 +76,14 @@ const CartScreen: React.FC = () => {
       item?.variants[0]?.inventorySync?.mrp ?? productPrice ?? 'N/A';
 
     const handleIncrement = (product: any) => {
-      setQuantity(quantity + 1);
-      const newQuantity = product.quantity + 1;
+      const newQuantity = quantity + 1;
       dispatch(
         updateQuantity({ productId: product.productId, quantity: newQuantity }),
       );
     };
 
     const handleDecrement = (product: any) => {
-      setQuantity(quantity - 1);
-      const newQuantity = product.quantity - 1;
+      const newQuantity = quantity - 1;
       if (newQuantity === 0) {
         dispatch(removeFromCart(product.productId));
       } else {
@@ -200,8 +200,7 @@ const CartScreen: React.FC = () => {
                     style={styles.counterButton}
                     onPress={() => {
                       if (quantity === 1) {
-                        setQuantity(0);
-                        dispatch(removeFromCart(item));
+                        dispatch(removeFromCart(item?.productId));
                       } else {
                         handleDecrement(item);
                       }
