@@ -37,8 +37,6 @@ const CartScreen: React.FC = () => {
     }
   };
 
-  console.error(cartItems?.length, 'cartItemscartItems');
-
   const quantityMap = useMemo(() => {
     const map: Record<string, number> = {};
     cartItems.forEach((item: any) => {
@@ -153,35 +151,15 @@ const CartScreen: React.FC = () => {
                   ? productName.substring(0, 67) + '...'
                   : productName}
               </Text>
-
-              <QuantitySelector item={item} />
+              <View style={{ marginBottom: 30 }}>
+                <QuantitySelector item={item} />
+              </View>
 
               <View style={styles.priceRow}>
                 <Text style={styles.sellingPrice}>₹{productPrice}</Text>
                 <Text style={styles.mrp}>{mrpPrice}</Text>
               </View>
               <SaleDropDown />
-              {/* <View style={styles.actionsRow}>
-                <TouchableOpacity style={styles.wishlistButton}>
-                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.addToCartButton,
-                    !item?.inStock && { borderColor: '#eee' }, // Example style
-                  ]}
-                  disabled={!mrpPrice && !productPrice}
-                  onPress={() => dispatch(addToCart(item))}
-                >
-                  <Text
-                    style={[
-                      styles.cartText,
-                      !item?.inStock && { color: '#eee' },
-                    ]}
-                  >
-                    Add
-                  </Text>
-                 </TouchableOpacity> */}
-              {/* </View> */}
 
               {quantity === 0 ? (
                 <TouchableOpacity

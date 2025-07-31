@@ -25,7 +25,7 @@ import QuantitySelector from '../customComponents/QuantitySelector';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProductDetails'>;
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const ProductDetailsScreen = () => {
   const product = useSelector(
@@ -44,8 +44,6 @@ const ProductDetailsScreen = () => {
 
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
-  const cartProducts = useSelector((state: RootState) => state?.cart?.items);
-  console.error(cartProducts, 'cardDetakiksls');
   const imageUrl =
     product?.image ||
     product?.variants?.[0]?.images?.[0]?.url ||
@@ -63,7 +61,7 @@ const ProductDetailsScreen = () => {
 
   const handleIncrement = (product: any) => {
     const newQuantity = quantity + 1;
-    setQuantity(quantity + 1);
+    setQuantity(newQuantity);
     if (quantity === 0) {
       dispatch(addToCart(product));
     } else {
@@ -75,7 +73,7 @@ const ProductDetailsScreen = () => {
 
   const handleDecrement = (product: any) => {
     const newQuantity = quantity - 1;
-    setQuantity(quantity - 1);
+    setQuantity(newQuantity);
     if (newQuantity === 0) {
       dispatch(removeFromCart(product.productId));
     } else {
@@ -87,8 +85,9 @@ const ProductDetailsScreen = () => {
       );
     }
   };
+
   return (
-    <SafeAreaView style={{}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9f9f9' }}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -98,32 +97,49 @@ const ProductDetailsScreen = () => {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Pallet Shop</Text>
       </View>
-      <ScrollView contentContainerStyle={styles.container}>
+
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
         <Image
           source={
             productImage
-              ? {
-                  uri: productImage,
-                }
-              : product?.variants?.[0]?.images?.[0]?.url
-              ? product?.variants?.[0]?.images?.[0]?.url
+              ? { uri: productImage }
               : foodType === 'NON_VEG'
               ? require('../../assets/images/Chicken-Tikka-Masala.webp')
               : require('../../assets/images/Green-Capsicum.webp')
           }
           style={styles.image}
         />
-
-        <Text style={styles.name}>{productName}</Text>
-        <Text style={styles.price}>₹{productPrice}</Text>
-        <Text style={styles.description}>{description}</Text>
-
-        <QuantitySelector item={product} />
-        <SaleDropDown />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ flex: 1 }} />
+          <Image
+            source={require('../../assets/images/barcode.png')}
+            style={styles.barcodeImage}
+          />
+          <View style={styles.deliveryTime}>
+            <Image
+              source={require('../../assets/images/delivery.png')}
+              style={styles.deliveryImage}
+            />
+            <Text style={styles.deliveryText}>2 hrs</Text>
+          </View>
+        </View>
+        <Text style={[styles.name, styles.mb15]}>{productName}</Text>
+        <Text style={[styles.price, styles.mb15]}>₹{productPrice}</Text>
+        <Text style={[styles.description, styles.mb15]}>{description}</Text>
+        <View style={styles.mb15}>
+          <QuantitySelector item={product} />
+        </View>
+        <View style={styles.mb15}>
+          <SaleDropDown />
+        </View>
         {quantity === 0 ? (
           <TouchableOpacity
             style={[
               styles.addToCartButton,
+              styles.mb15,
               !product?.inStock && { borderColor: '#eee' },
             ]}
             disabled={!mrpPrice && !productPrice}
@@ -138,7 +154,7 @@ const ProductDetailsScreen = () => {
             </Text>
           </TouchableOpacity>
         ) : (
-          <View style={styles.counterContainer}>
+          <View style={[styles.counterContainer, styles.mb15]}>
             <TouchableOpacity
               style={styles.counterButton}
               onPress={() => {
@@ -165,30 +181,62 @@ const ProductDetailsScreen = () => {
             </TouchableOpacity>
           </View>
         )}
-        <View style={styles.viewCart}>
-          <TouchableOpacity
-            style={[styles.button, styles.viewButton]}
-            onPress={() => dispatch(removeFromCart(product.productId))}
-          >
-            <Text style={styles.viewCartText}>View Cart</Text>
-          </TouchableOpacity>
-        </View>
+        <View style={{ height: 100 }} /> {/* Spacer for bottom button */}
       </ScrollView>
+
+      <View style={styles.viewCart}>
+        <TouchableOpacity
+          style={[styles.button, styles.viewButton]}
+          onPress={() => dispatch(removeFromCart(product.productId))}
+        >
+          <Text style={styles.viewCartText}>View Cart</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
+
+const { height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: width * 0.05,
     paddingVertical: 16,
-    height: height * 0.92,
     paddingBottom: 40,
     backgroundColor: '#f9f9f9',
+  },
+  mb15: {
+    marginBottom: 15,
   },
   iconButtonText: {
     fontSize: 18,
     fontWeight: '800',
+  },
+  deliveryTime: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(153, 151, 151, 0.6)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginTop: 15,
+    alignSelf: 'flex-end',
+    right: 10,
+  },
+  deliveryText: {
+    color: '#000',
+    fontSize: 12,
+  },
+  deliveryImage: {
+    width: width * 0.06,
+    height: width * 0.03,
+    resizeMode: 'contain',
+  },
+  barcodeImage: {
+    width: width * 0.1,
+    height: width * 0.1,
+    resizeMode: 'contain',
+    alignSelf: 'center',
   },
   header: {
     flexDirection: 'row',
@@ -216,11 +264,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    marginTop: 30,
+    marginTop: 20,
     width: width * 0.85,
     height: width * 0.85,
     borderRadius: 16,
-    marginBottom: 20,
+    marginBottom: 5,
     alignSelf: 'center',
     borderWidth: 2,
     borderColor: '#666',
@@ -228,24 +276,17 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 8,
     color: '#000',
   },
   price: {
     fontSize: 20,
     fontWeight: '600',
     color: '#2ecc71',
-    marginBottom: 10,
   },
   description: {
     fontSize: 16,
     lineHeight: 22,
     color: '#666',
-    marginBottom: 24,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
   },
   button: {
     flex: 1,
@@ -253,22 +294,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     borderRadius: 8,
     alignItems: 'center',
-  },
-  addButton: {
-    backgroundColor: '#ffffff',
-    borderColor: '#e74c3c',
-    borderWidth: 1,
-  },
-  removeButton: {
-    backgroundColor: '#e74c3c',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  addbuttonText: {
-    color: '#e74c3c',
-    fontWeight: '600',
   },
   viewCart: {
     position: 'absolute',

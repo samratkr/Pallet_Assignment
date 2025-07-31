@@ -98,6 +98,10 @@ const ListComponent = ({ item, quantityMap }: any) => {
         </TouchableOpacity>
 
         <View style={styles.deliveryTime}>
+          <Image
+            source={require('../../assets/images/delivery.png')}
+            style={styles.deliveryImage}
+          />
           <Text style={styles.deliveryText}>2 hrs</Text>
         </View>
 
@@ -235,7 +239,7 @@ const styles = StyleSheet.create({
   },
   deliveryTime: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(153, 151, 151, 0.6)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -245,7 +249,7 @@ const styles = StyleSheet.create({
     right: 10,
   },
   deliveryText: {
-    color: '#fff',
+    color: '#000',
     fontSize: 12,
   },
   infoContainer: {
@@ -318,6 +322,11 @@ const styles = StyleSheet.create({
   saveIconImage: {
     width: 18,
     height: 18,
+    resizeMode: 'contain',
+  },
+  deliveryImage: {
+    width: width * 0.06,
+    height: width * 0.03,
     resizeMode: 'contain',
   },
   cartText: {

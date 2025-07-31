@@ -23,7 +23,6 @@ export const GetProductApiHelper = createAsyncThunk<
     );
     return response.data;
   } catch (error: any) {
-    console.error('API Error:', error.message);
     console.error('Details:', error.response?.data || error);
     return rejectWithValue(
       error.response?.data || { message: 'Failed to Get Products' },
