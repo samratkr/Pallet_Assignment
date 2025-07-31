@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React from 'react';
 import {
   Dimensions,
   Image,
@@ -7,31 +8,23 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import SimpleDropDown from './SimpleDropDown';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch } from '../store/store';
-import { singleProduct } from '../store/reducers/productReducer';
-import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
 import {
   addToCart,
   removeFromCart,
   updateQuantity,
 } from '../store/reducers/cartReducer';
+import { singleProduct } from '../store/reducers/productReducer';
+import { AppDispatch } from '../store/store';
+import SimpleDropDown from './SimpleDropDown';
 
 const { width, height } = Dimensions.get('window');
 
-const ListComponent = ({ item }: any) => {
+const ListComponent = ({ item, quantityMap }: any) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation();
-  const quantityNum = useSelector((state: any) => {
-    return (
-      state.cart.items.find(
-        (cartItem: any) => cartItem?.productId === item.productId,
-      )?.quantity || 0
-    );
-  });
 
-  const [quantity, setQuantity] = useState(quantityNum || 0);
+  const quantity = quantityMap[item?.productId] || 0;
 
   const productImage =
     item.image || item?.variants?.[0]?.images?.[0]?.url || null;
@@ -43,15 +36,17 @@ const ListComponent = ({ item }: any) => {
 
   const handleIncrement = (product: any) => {
     const newQuantity = quantity + 1;
-    setQuantity(quantity + 1);
-    dispatch(
-      updateQuantity({ productId: product.productId, quantity: newQuantity }),
-    );
+    if (quantity === 0) {
+      dispatch(addToCart(product));
+    } else {
+      dispatch(
+        updateQuantity({ productId: product.productId, quantity: newQuantity }),
+      );
+    }
   };
 
   const handleDecrement = (product: any) => {
     const newQuantity = quantity - 1;
-    setQuantity(quantity - 1);
     if (newQuantity === 0) {
       dispatch(removeFromCart(product.productId));
     } else {
@@ -119,6 +114,8 @@ const ListComponent = ({ item }: any) => {
             <Text style={styles.mrp}>{mrpPrice}</Text>
           </View>
 
+          <SimpleDropDown />
+
           {quantity === 0 ? (
             <TouchableOpacity
               style={[
@@ -142,7 +139,6 @@ const ListComponent = ({ item }: any) => {
                 style={styles.counterButton}
                 onPress={() => {
                   if (quantity === 1) {
-                    setQuantity(0);
                     dispatch(removeFromCart(item?.productId));
                   } else {
                     handleDecrement(item);
@@ -228,9 +224,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 6,
     alignItems: 'center',
+    marginTop: 15,
     alignSelf: 'flex-end',
-    position: 'absolute',
-    top: 10,
     right: 10,
   },
   deliveryText: {

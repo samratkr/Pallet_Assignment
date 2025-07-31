@@ -77,9 +77,16 @@ const CartScreen: React.FC = () => {
 
     const handleIncrement = (product: any) => {
       const newQuantity = quantity + 1;
-      dispatch(
-        updateQuantity({ productId: product.productId, quantity: newQuantity }),
-      );
+      if (quantity === 0) {
+        dispatch(addToCart(product));
+      } else {
+        dispatch(
+          updateQuantity({
+            productId: product.productId,
+            quantity: newQuantity,
+          }),
+        );
+      }
     };
 
     const handleDecrement = (product: any) => {

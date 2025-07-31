@@ -39,7 +39,6 @@ const LoginScreen: React.FC = () => {
 
       // Sign in directly
       const userInfo = await GoogleSignin.signIn();
-      console.log('Google user info:', userInfo, 'Google user info');
 
       if (userInfo?.data?.user) {
         dispatch(setUser(userInfo?.data?.user));
@@ -86,7 +85,10 @@ const LoginScreen: React.FC = () => {
     <View style={styles.container}>
       {loading && <Loader />}
       {user?.givenName && (
-        <Text style={styles.title}>Hi, {user?.givenName}</Text>
+        <Text style={styles.title}>
+          Hi, {user.givenName.charAt(0).toUpperCase()}
+          {user.givenName.slice(1).toLowerCase()}
+        </Text>
       )}
       <Text style={styles.title}>Welcome to Pallet Shop</Text>
       <Text style={styles.subtitle}>Sign in with Google to get started</Text>

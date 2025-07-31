@@ -33,6 +33,8 @@ export default function SimpleDropDown() {
 const styles = StyleSheet.create({
   wrapper: {
     zIndex: 1000,
+    marginBottom: 15,
+    marginTop: 5,
   },
   dropdown: {
     height: 48,

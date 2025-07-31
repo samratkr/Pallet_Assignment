@@ -1,7 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Dimensions,
   FlatList,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -26,6 +27,7 @@ const ProductListScreen = () => {
   const loading = useSelector((state: any) => state.product.loading);
   const flatListRef = useRef<FlatList>(null);
   const user = useSelector((state: any) => state?.auth?.user);
+
   const navigation = useNavigation();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -37,7 +39,13 @@ const ProductListScreen = () => {
   };
 
   const cartItems = useSelector((state: any) => state?.cart?.items);
-
+  const quantityMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    cartItems.forEach((item: any) => {
+      map[item?.productId] = item?.quantity;
+    });
+    return map;
+  }, [cartItems]);
   const handleNext = () => {
     const nextIndex = Math.min(currentIndex + 1, products.length - 1);
     scrollToIndex(nextIndex);
@@ -51,7 +59,7 @@ const ProductListScreen = () => {
   const renderItem = ({ item }: any) => {
     return (
       <View>
-        <ListComponent item={item} />
+        <ListComponent item={item} quantityMap={quantityMap} />
       </View>
     );
   };
@@ -84,9 +92,25 @@ const ProductListScreen = () => {
   return (
     <View style={styles.mainContainer}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>
-          {user?.givenName ? user.givenName + `'s ` : ''}Pallet Shop
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <Image
+            source={
+              user?.photo
+                ? {
+                    uri: user?.photo,
+                  }
+                : require('../../assets/images/user.jpg')
+            }
+            style={styles.imageProfile}
+          />
+          <Text style={styles.headerTitle}>
+            {user?.givenName
+              ? `Hello, ${user.givenName
+                  .charAt(0)
+                  .toUpperCase()}${user.givenName.slice(1).toLowerCase()}`
+              : 'Pallet Shop'}
+          </Text>
+        </View>
         <View style={styles.topButtons}>
           <TouchableOpacity onPress={handlePrevious} style={styles.iconButton}>
             <Text style={styles.iconButtonText}>{'<'}</Text>
@@ -105,11 +129,17 @@ const ProductListScreen = () => {
           item.productId?.toString() || index.toString()
         }
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingVertical: CARD_MARGIN * 2 }}
+        contentContainerStyle={{
+          paddingVertical: CARD_MARGIN * 2,
+        }}
         onViewableItemsChanged={onViewableItemsChanged.current}
         viewabilityConfig={viewabilityConfig}
         ListFooterComponent={
-          loading && hasMore ? <Loader size="small" background={false} /> : null
+          loading && hasMore ? (
+            <Loader size="small" background={false} />
+          ) : (
+            <View style={{ marginBottom: height * 0.1 }}></View>
+          )
         }
       />
       {cartItems?.length > 0 && (
@@ -130,7 +160,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 16,
     backgroundColor: '#f9f9f9',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
@@ -195,6 +225,13 @@ const styles = StyleSheet.create({
     height: '90%',
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
+    alignSelf: 'center',
+  },
+
+  imageProfile: {
+    width: width * 0.05,
+    height: width * 0.05,
+    borderRadius: 50,
     alignSelf: 'center',
   },
   itemSymbol: {
@@ -302,9 +339,11 @@ const styles = StyleSheet.create({
   },
   viewCart: {
     position: 'absolute',
-    bottom: 30,
-    width: width * 0.95,
+    bottom: 0,
+    width: width,
     alignSelf: 'center',
+    backgroundColor: '#f9f9f9',
+    padding: 20,
   },
   viewButton: {
     backgroundColor: '#000',

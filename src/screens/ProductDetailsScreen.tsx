@@ -61,9 +61,13 @@ const ProductDetailsScreen = () => {
   const handleIncrement = (product: any) => {
     const newQuantity = quantity + 1;
     setQuantity(quantity + 1);
-    dispatch(
-      updateQuantity({ productId: product.productId, quantity: newQuantity }),
-    );
+    if (quantity === 0) {
+      dispatch(addToCart(product));
+    } else {
+      dispatch(
+        updateQuantity({ productId: product.productId, quantity: newQuantity }),
+      );
+    }
   };
 
   const handleDecrement = (product: any) => {
@@ -184,7 +188,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 15,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     backgroundColor: '#f9f9f9',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
@@ -261,9 +265,11 @@ const styles = StyleSheet.create({
   },
   viewCart: {
     position: 'absolute',
-    bottom: 30,
-    width: width * 0.95,
+    bottom: 0,
+    width: width,
     alignSelf: 'center',
+    backgroundColor: '#f9f9f9',
+    padding: 20,
   },
   viewButton: {
     backgroundColor: '#000',
@@ -277,7 +283,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    flex: 1,
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderWidth: 1.5,
