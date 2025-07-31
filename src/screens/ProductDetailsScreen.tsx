@@ -22,6 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 import SimpleDropDown from '../customComponents/SimpleDropDown';
 import SaleDropDown from '../customComponents/SaleDropDown';
 import QuantitySelector from '../customComponents/QuantitySelector';
+import BarcodeComponent from '../customComponents/BarCodeGenerator';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProductDetails'>;
 
@@ -86,6 +87,8 @@ const ProductDetailsScreen = () => {
     }
   };
 
+  const [modalOpen, setModalOpen] = useState(false);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f9f9f9' }}>
       <View style={styles.header}>
@@ -112,12 +115,20 @@ const ProductDetailsScreen = () => {
           }
           style={styles.image}
         />
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View style={{ flex: 1 }} />
-          <Image
-            source={require('../../assets/images/barcode.png')}
-            style={styles.barcodeImage}
-          />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <View style={{ width: width * 0.1 }} />
+          <TouchableOpacity onPress={() => setModalOpen(true)}>
+            <Image
+              source={require('../../assets/images/barcode.png')}
+              style={styles.barcodeImage}
+            />
+          </TouchableOpacity>
           <View style={styles.deliveryTime}>
             <Image
               source={require('../../assets/images/delivery.png')}
@@ -192,6 +203,11 @@ const ProductDetailsScreen = () => {
           <Text style={styles.viewCartText}>View Cart</Text>
         </TouchableOpacity>
       </View>
+      {/* <BarcodeComponent
+        visible={modalOpen}
+        onClose={setModalOpen}
+        value={product?.variants[0]?.barcodes}
+      /> */}
     </SafeAreaView>
   );
 };

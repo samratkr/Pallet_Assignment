@@ -34,19 +34,19 @@ const LoginScreen: React.FC = () => {
 
   const signInWithGoogle = async () => {
     try {
-      // await GoogleSignin.hasPlayServices();
+      await GoogleSignin.hasPlayServices();
 
-      // const userInfo = await GoogleSignin.signIn();
+      const userInfo = await GoogleSignin.signIn();
 
-      // if (userInfo?.data?.user) {
-      //   dispatch(setUser(userInfo?.data?.user));
-      // } else {
-      //   Alert.alert(
-      //     'Error',
-      //     'Failed to retrieve user info from Google Sign-In.',
-      //   );
-      //   return;
-      // }
+      if (userInfo?.data?.user) {
+        dispatch(setUser(userInfo?.data?.user));
+      } else {
+        Alert.alert(
+          'Error',
+          'Failed to retrieve user info from Google Sign-In.',
+        );
+        return;
+      }
 
       const getProducts = await dispatch(
         GetProductApiHelper({
