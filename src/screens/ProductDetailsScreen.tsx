@@ -13,7 +13,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { RootStackParamList } from '../navigator/AppNavigation';
 import { addToCart, removeFromCart } from '../store/reducers/cartReducer';
-import { RootState } from '../store/store';
+import { AppDispatch, RootState } from '../store/store';
 import { useNavigation } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProductDetails'>;
@@ -25,8 +25,9 @@ const ProductDetailsScreen = () => {
     (state: RootState) => state?.product?.singleProduct,
   );
   const navigation = useNavigation();
-  const dispatch = useDispatch();
-
+  const dispatch = useDispatch<AppDispatch>();
+  const cartProducts = useSelector((state: RootState) => state?.cart?.items);
+  console.error(cartProducts, 'cardDetakiksls');
   const imageUrl =
     product?.image ||
     product?.variants?.[0]?.images?.[0]?.url ||

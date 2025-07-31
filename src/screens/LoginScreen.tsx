@@ -35,9 +35,9 @@ const LoginScreen: React.FC = () => {
 
   const signInWithGoogle = async () => {
     try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      dispatch(setUser(userInfo?.user));
+      // await GoogleSignin.hasPlayServices();
+      // const userInfo = await GoogleSignin.signIn();
+      // dispatch(setUser(userInfo?.user));
       const getProducts = await dispatch(
         GetProductApiHelper({
           page: '1',

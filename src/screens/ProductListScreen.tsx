@@ -1,27 +1,22 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
-  View,
+  Dimensions,
   FlatList,
   StyleSheet,
-  TouchableOpacity,
   Text,
-  Dimensions,
-  Image,
-  ScrollView,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart } from '../store/reducers/cartReducer';
+import ListComponent from '../customComponents/ListComponent';
+import Loader from '../customComponents/Loader';
 import { GetProductApiHelper } from '../store/helpers/productApis';
 import { AppDispatch } from '../store/store';
-import Loader from '../customComponents/Loader';
-import SimpleDropDown from '../customComponents/SimpleDropDown';
 import { useNavigation } from '@react-navigation/native';
-import { singleProduct } from '../store/reducers/productReducer';
-// import { Ionicons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 const CARD_MARGIN = 10;
-const CARD_WIDTH = width * 0.65; // 1.5 cards = 65% approx
+const CARD_HEIGHT = height * 0.66;
 
 const ProductListScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -30,15 +25,17 @@ const ProductListScreen = () => {
   const page = useSelector((state: any) => state.product.page);
   const loading = useSelector((state: any) => state.product.loading);
   const flatListRef = useRef<FlatList>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const user = useSelector((state: any) => state?.auth?.user);
   const navigation = useNavigation();
+
+  const [currentIndex, setCurrentIndex] = useState(0);
   const scrollToIndex = (index: number) => {
     if (flatListRef.current) {
       flatListRef.current.scrollToIndex({ index, animated: true });
       setCurrentIndex(index);
     }
   };
-  const user = useSelector((state: any) => state?.auth?.user);
+
   const handleNext = () => {
     const nextIndex = Math.min(currentIndex + 1, products.length - 1);
     scrollToIndex(nextIndex);
@@ -49,106 +46,10 @@ const ProductListScreen = () => {
     scrollToIndex(prevIndex);
   };
 
-  const handleSingleProduct = async (item: any) => {
-    const result = await dispatch(singleProduct(item));
-    if (result) {
-      navigation.navigate('ProductDetails');
-    }
-  };
-
   const renderItem = ({ item }: any) => {
-    const productImage =
-      item.image || item?.variants?.[0]?.images?.[0]?.url || null;
-    const productName = item.name || item.title || 'No Name';
-    const foodType = item?.attributes?.foodType;
-    const productPrice =
-      item?.variants[0]?.inventorySync?.sellingPrice || 'N/A';
-    const mrpPrice =
-      item?.variants[0]?.inventorySync?.mrp ?? productPrice ?? 'N/A';
-
     return (
-      <View style={styles.cardWrapper}>
-        <View style={styles.container}>
-          <ScrollView>
-            <TouchableOpacity
-              style={styles.imageContainer}
-              onPress={() => handleSingleProduct(item)}
-            >
-              <Image
-                source={
-                  productImage
-                    ? {
-                        uri: productImage,
-                      }
-                    : item?.variants?.[0]?.images?.[0]?.url
-                    ? item?.variants?.[0]?.images?.[0]?.url
-                    : foodType === 'NON_VEG'
-                    ? require('../../assets/images/Chicken-Tikka-Masala.webp')
-                    : require('../../assets/images/Green-Capsicum.webp')
-                }
-                style={styles.image}
-                resizeMode="cover"
-              />
-              <View style={styles.discountBadge}>
-                <Text style={styles.discountText}>10% OFF</Text>
-              </View>
-              <Image
-                source={
-                  foodType === 'NON_VEG'
-                    ? require('../../assets/images/non-veg-foodtype.webp')
-                    : require('../../assets/images/vegan.webp')
-                }
-                style={styles.itemSymbol}
-                resizeMode="cover"
-              />
-            </TouchableOpacity>
-
-            <View style={styles.deliveryTime}>
-              {/* <Ionicons name="time-outline" size={14} color="#fff" /> */}
-              <Text style={styles.deliveryText}> 2 hrs</Text>
-            </View>
-
-            <View style={styles.infoContainer}>
-              <Text style={styles.brand}>Fresho</Text>
-              <Text style={styles.productName}>
-                {productName.length > 40
-                  ? productName.substring(0, 67) + '...'
-                  : productName}
-              </Text>
-
-              <SimpleDropDown />
-
-              <View style={styles.priceRow}>
-                <Text style={styles.sellingPrice}>₹{productPrice}</Text>
-                <Text style={styles.mrp}>{mrpPrice}</Text>
-              </View>
-              <SimpleDropDown />
-              <View style={styles.actionsRow}>
-                <TouchableOpacity style={styles.wishlistButton}>
-                  {/* <Ionicons name="heart-outline" size={20} color="#f00" /> */}
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.addToCartButton,
-                    !item?.inStock && { borderColor: '#eee' }, // Example style
-                  ]}
-                  disabled={!mrpPrice && !productPrice}
-                  onPress={() => dispatch(addToCart(item))}
-                >
-                  <Text
-                    style={[
-                      styles.cartText,
-                      !item?.inStock && { color: '#eee' },
-                    ]}
-                  >
-                    Add
-                  </Text>
-                  {/* <Ionicons name="cart-outline" size={18} color="#fff" style={{ marginLeft: 8 }} /> */}
-                </TouchableOpacity>
-              </View>
-            </View>
-          </ScrollView>
-        </View>
+      <View>
+        <ListComponent item={item} />
       </View>
     );
   };
@@ -158,7 +59,6 @@ const ProductListScreen = () => {
   };
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
-    console.error('Visible items:', viewableItems);
     const lastIndex = products.length - 1;
     const isLastVisible = viewableItems.some(
       (item: any) => item.index === lastIndex,
@@ -175,11 +75,15 @@ const ProductListScreen = () => {
     }
   });
 
+  const handleViewCard = () => {
+    navigation.navigate('Cart');
+  };
+
   return (
     <View style={styles.mainContainer}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>
-          {user?.name && user?.name}Pallet Shop
+          {user?.name ? user.name + `'s ` : ''}Pallet Shop
         </Text>
         <View style={styles.topButtons}>
           <TouchableOpacity onPress={handlePrevious} style={styles.iconButton}>
@@ -193,28 +97,22 @@ const ProductListScreen = () => {
 
       <FlatList
         ref={flatListRef}
-        horizontal
         data={products}
         renderItem={renderItem}
         keyExtractor={(item, index) =>
           item.productId?.toString() || index.toString()
         }
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={CARD_WIDTH + CARD_MARGIN * 2}
-        decelerationRate="fast"
-        pagingEnabled={false}
-        contentContainerStyle={{ paddingHorizontal: CARD_MARGIN }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingVertical: CARD_MARGIN * 2 }}
         onViewableItemsChanged={onViewableItemsChanged.current}
         viewabilityConfig={viewabilityConfig}
         ListFooterComponent={
           loading && hasMore ? <Loader size="small" background={false} /> : null
         }
       />
+
       <View style={styles.viewCart}>
-        <TouchableOpacity
-          style={[styles.viewButton]}
-          // onPress={() => dispatch(removeFromCart(product.id))}
-        >
+        <TouchableOpacity style={styles.viewButton} onPress={handleViewCard}>
           <Text style={styles.viewCartText}>View Cart</Text>
         </TouchableOpacity>
       </View>
@@ -226,7 +124,16 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: '#f9f9f9',
-    // paddingTop: 20,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#f9f9f9',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    elevation: 3,
+    zIndex: 10,
+    justifyContent: 'center',
   },
   topButtons: {
     position: 'absolute',
@@ -235,43 +142,22 @@ const styles = StyleSheet.create({
     zIndex: 10,
     gap: 10,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: '#f9f9f9',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    elevation: 3,
-    zIndex: 10,
+  iconButtonText: {
+    fontSize: 18,
+    fontWeight: '800',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
   },
-  iconButton: {
-    padding: 8,
-    paddingHorizontal: 14,
-    backgroundColor: '#e3e3e3ff',
-    borderRadius: 10,
-    marginLeft: 10,
-    alignItems: 'center',
-  },
-  iconButtonText: {
-    fontSize: 18,
-    fontWeight: '800',
-  },
   cardWrapper: {
-    width: CARD_WIDTH,
-    marginHorizontal: CARD_MARGIN,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginVertical: CARD_MARGIN,
+    paddingHorizontal: 10,
+    width: '100%',
   },
   container: {
-    height: height * 0.8,
+    height: CARD_HEIGHT,
     backgroundColor: '#fff',
     borderRadius: 12,
     overflow: 'hidden',
@@ -282,7 +168,15 @@ const styles = StyleSheet.create({
     elevation: 4,
     borderWidth: 1,
     borderColor: '#eee',
-    width: width * 0.675,
+    width: '100%',
+  },
+  iconButton: {
+    padding: 8,
+    paddingHorizontal: 14,
+    backgroundColor: '#e3e3e3ff',
+    borderRadius: 10,
+    marginLeft: 10,
+    alignItems: 'center',
   },
   imageContainer: {
     height: height * 0.3,
@@ -306,7 +200,6 @@ const styles = StyleSheet.create({
     height: width * 0.04,
     bottom: 10,
     left: 10,
-    alignSelf: 'center',
   },
   discountBadge: {
     position: 'absolute',
@@ -332,6 +225,9 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     alignItems: 'center',
     alignSelf: 'flex-end',
+    position: 'absolute',
+    top: height * 0.3 + 30,
+    marginRight: 20,
   },
   deliveryText: {
     color: '#fff',
@@ -339,6 +235,7 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     padding: 16,
+    marginTop: 20,
   },
   brand: {
     fontSize: 14,
