@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -12,7 +12,11 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootStackParamList } from '../navigator/AppNavigation';
-import { addToCart, removeFromCart } from '../store/reducers/cartReducer';
+import {
+  addToCart,
+  removeFromCart,
+  updateQuantity,
+} from '../store/reducers/cartReducer';
 import { AppDispatch, RootState } from '../store/store';
 import { useNavigation } from '@react-navigation/native';
 
@@ -24,6 +28,14 @@ const ProductDetailsScreen = () => {
   const product = useSelector(
     (state: RootState) => state?.product?.singleProduct,
   );
+
+  const quantity = useSelector((state: any) => {
+    return (
+      state.cart.items.find(
+        (cartItem: any) => cartItem.productId === product.productId,
+      )?.quantity || 0
+    );
+  });
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
   const cartProducts = useSelector((state: RootState) => state?.cart?.items);
@@ -43,6 +55,26 @@ const ProductDetailsScreen = () => {
   const mrpPrice =
     product?.variants[0]?.inventorySync?.mrp ?? productPrice ?? 'N/A';
 
+  const handleIncrement = (product: any) => {
+    const newQuantity = product.quantity + 1;
+    dispatch(
+      updateQuantity({ productId: product.productId, quantity: newQuantity }),
+    );
+  };
+
+  const handleDecrement = (product: any) => {
+    const newQuantity = product.quantity - 1;
+    if (newQuantity === 0) {
+      dispatch(removeFromCart(product.productId));
+    } else {
+      dispatch(
+        updateQuantity({
+          productId: product.productId,
+          quantity: newQuantity,
+        }),
+      );
+    }
+  };
   return (
     <SafeAreaView style={{}}>
       <View style={styles.header}>
@@ -73,22 +105,50 @@ const ProductDetailsScreen = () => {
         <Text style={styles.name}>{productName}</Text>
         <Text style={styles.price}>₹{productPrice}</Text>
         <Text style={styles.description}>{description}</Text>
-
-        <View style={styles.actions}>
+        {quantity === 0 ? (
           <TouchableOpacity
-            style={[styles.button, styles.addButton]}
-            onPress={() => dispatch(addToCart(product))}
+            style={[
+              styles.addToCartButton,
+              !product?.inStock && { borderColor: '#eee' },
+            ]}
+            disabled={!mrpPrice && !productPrice}
+            onPress={() => {
+              handleIncrement(product);
+            }}
           >
-            <Text style={styles.addbuttonText}>Add to Cart</Text>
+            <Text
+              style={[styles.cartText, !product?.inStock && { color: '#eee' }]}
+            >
+              Add
+            </Text>
           </TouchableOpacity>
+        ) : (
+          <View style={styles.counterContainer}>
+            <TouchableOpacity
+              style={styles.counterButton}
+              onPress={() => {
+                if (quantity === 1) {
+                  dispatch(removeFromCart(product));
+                } else {
+                  handleDecrement(product);
+                }
+              }}
+            >
+              <Text style={styles.counterText}>-</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.button, styles.removeButton]}
-            onPress={() => dispatch(removeFromCart(product.id))}
-          >
-            <Text style={styles.buttonText}>Remove from Cart</Text>
-          </TouchableOpacity>
-        </View>
+            <Text style={styles.counterValue}>{quantity}</Text>
+
+            <TouchableOpacity
+              style={styles.counterButton}
+              onPress={() => {
+                handleIncrement(product);
+              }}
+            >
+              <Text style={styles.counterText}>+</Text>
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.viewCart}>
           <TouchableOpacity
             style={[styles.button, styles.viewButton]}
@@ -108,6 +168,10 @@ const styles = StyleSheet.create({
     height: height * 0.92,
     paddingBottom: 40,
     backgroundColor: '#f9f9f9',
+  },
+  iconButtonText: {
+    fontSize: 18,
+    fontWeight: '800',
   },
   header: {
     flexDirection: 'row',
@@ -202,6 +266,52 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '900',
     fontSize: 18,
+  },
+  counterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1.5,
+    borderColor: '#d63333ff',
+    borderRadius: 4,
+  },
+  counterButton: {
+    padding: 8,
+    borderRadius: 4,
+    backgroundColor: '#f8f8f8',
+    borderColor: '#d63333ff',
+    borderWidth: 1,
+    paddingHorizontal: 20,
+  },
+  counterText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#d63333ff',
+  },
+  counterValue: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginHorizontal: 12,
+  },
+  addToCartButton: {
+    flexDirection: 'row',
+    backgroundColor: '#ffffff',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: '#d63333ff',
+    alignItems: 'center',
+    width: width * 0.9,
+    justifyContent: 'center',
+  },
+  cartText: {
+    color: '#d63333ff',
+    fontWeight: '900',
+    fontSize: 20,
   },
 });
 

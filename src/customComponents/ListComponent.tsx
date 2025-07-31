@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -8,17 +8,28 @@ import {
   View,
 } from 'react-native';
 import SimpleDropDown from './SimpleDropDown';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '../store/store';
 import { singleProduct } from '../store/reducers/productReducer';
 import { useNavigation } from '@react-navigation/native';
-import { addToCart } from '../store/reducers/cartReducer';
+import {
+  addToCart,
+  removeFromCart,
+  updateQuantity,
+} from '../store/reducers/cartReducer';
 
 const { width, height } = Dimensions.get('window');
 
 const ListComponent = ({ item }: any) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation();
+  const quantity = useSelector((state: any) => {
+    return (
+      state.cart.items.find(
+        (cartItem: any) => cartItem.productId === item.productId,
+      )?.quantity || 0
+    );
+  });
   const productImage =
     item.image || item?.variants?.[0]?.images?.[0]?.url || null;
   const productName = item.name || item.title || 'No Name';
@@ -26,6 +37,24 @@ const ListComponent = ({ item }: any) => {
   const productPrice = item?.variants[0]?.inventorySync?.sellingPrice || 'N/A';
   const mrpPrice =
     item?.variants[0]?.inventorySync?.mrp ?? productPrice ?? 'N/A';
+
+  const handleIncrement = (product: any) => {
+    const newQuantity = product.quantity + 1;
+    dispatch(
+      updateQuantity({ productId: product.productId, quantity: newQuantity }),
+    );
+  };
+
+  const handleDecrement = (product: any) => {
+    const newQuantity = product.quantity - 1;
+    if (newQuantity === 0) {
+      dispatch(removeFromCart(product.productId));
+    } else {
+      dispatch(
+        updateQuantity({ productId: product.productId, quantity: newQuantity }),
+      );
+    }
+  };
 
   const handleSingleProduct = async (item: any) => {
     const result = await dispatch(singleProduct(item));
@@ -85,15 +114,16 @@ const ListComponent = ({ item }: any) => {
             <Text style={styles.mrp}>{mrpPrice}</Text>
           </View>
 
-          <View style={styles.actionsRow}>
-            <TouchableOpacity style={styles.wishlistButton}></TouchableOpacity>
+          {quantity === 0 ? (
             <TouchableOpacity
               style={[
                 styles.addToCartButton,
                 !item?.inStock && { borderColor: '#eee' },
               ]}
               disabled={!mrpPrice && !productPrice}
-              onPress={() => dispatch(addToCart(item))}
+              onPress={() => {
+                handleIncrement(item);
+              }}
             >
               <Text
                 style={[styles.cartText, !item?.inStock && { color: '#eee' }]}
@@ -101,7 +131,33 @@ const ListComponent = ({ item }: any) => {
                 Add
               </Text>
             </TouchableOpacity>
-          </View>
+          ) : (
+            <View style={styles.counterContainer}>
+              <TouchableOpacity
+                style={styles.counterButton}
+                onPress={() => {
+                  if (quantity === 1) {
+                    dispatch(removeFromCart(item));
+                  } else {
+                    handleDecrement(item);
+                  }
+                }}
+              >
+                <Text style={styles.counterText}>-</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.counterValue}>{quantity}</Text>
+
+              <TouchableOpacity
+                style={styles.counterButton}
+                onPress={() => {
+                  handleIncrement(item);
+                }}
+              >
+                <Text style={styles.counterText}>+</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
     </View>
@@ -236,6 +292,35 @@ const styles = StyleSheet.create({
     color: '#d63333ff',
     fontWeight: '900',
     fontSize: 18,
+  },
+  counterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1.5,
+    borderColor: '#d63333ff',
+    borderRadius: 4,
+  },
+  counterButton: {
+    padding: 8,
+    borderRadius: 4,
+    backgroundColor: '#f8f8f8',
+    borderColor: '#d63333ff',
+    borderWidth: 1,
+    paddingHorizontal: 20,
+  },
+  counterText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#d63333ff',
+  },
+  counterValue: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginHorizontal: 12,
   },
 });
 

@@ -12,7 +12,11 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import SimpleDropDown from '../customComponents/SimpleDropDown';
-import { addToCart } from '../store/reducers/cartReducer';
+import {
+  addToCart,
+  removeFromCart,
+  updateQuantity,
+} from '../store/reducers/cartReducer';
 import { singleProduct } from '../store/reducers/productReducer';
 import { RootState } from '../store/store';
 
@@ -51,6 +55,13 @@ const CartScreen: React.FC = () => {
   };
 
   const renderItem = ({ item }: any) => {
+    const quantity = useSelector((state: any) => {
+      return (
+        state.cart.items.find(
+          (cartItem: any) => cartItem.productId === item.productId,
+        )?.quantity || 0
+      );
+    });
     const productImage =
       item.image || item?.variants?.[0]?.images?.[0]?.url || null;
     const productName = item.name || item.title || 'No Name';
@@ -60,6 +71,26 @@ const CartScreen: React.FC = () => {
     const mrpPrice =
       item?.variants[0]?.inventorySync?.mrp ?? productPrice ?? 'N/A';
 
+    const handleIncrement = (product: any) => {
+      const newQuantity = product.quantity + 1;
+      dispatch(
+        updateQuantity({ productId: product.productId, quantity: newQuantity }),
+      );
+    };
+
+    const handleDecrement = (product: any) => {
+      const newQuantity = product.quantity - 1;
+      if (newQuantity === 0) {
+        dispatch(removeFromCart(product.productId));
+      } else {
+        dispatch(
+          updateQuantity({
+            productId: product.productId,
+            quantity: newQuantity,
+          }),
+        );
+      }
+    };
     return (
       <View style={styles.cardWrapper}>
         <View style={styles.container}>
@@ -117,10 +148,9 @@ const CartScreen: React.FC = () => {
                 <Text style={styles.mrp}>{mrpPrice}</Text>
               </View>
               <SimpleDropDown />
-              <View style={styles.actionsRow}>
+              {/* <View style={styles.actionsRow}>
                 <TouchableOpacity style={styles.wishlistButton}>
-                  {/* <Ionicons name="heart-outline" size={20} color="#f00" /> */}
-                </TouchableOpacity>
+                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     styles.addToCartButton,
@@ -137,9 +167,56 @@ const CartScreen: React.FC = () => {
                   >
                     Add
                   </Text>
-                  {/* <Ionicons name="cart-outline" size={18} color="#fff" style={{ marginLeft: 8 }} /> */}
+                 </TouchableOpacity> */}
+              {/* </View> */}
+
+              {quantity === 0 ? (
+                <TouchableOpacity
+                  style={[
+                    styles.addToCartButton,
+                    !item?.inStock && { borderColor: '#eee' },
+                  ]}
+                  disabled={!mrpPrice && !productPrice}
+                  onPress={() => {
+                    handleIncrement(item);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.cartText,
+                      !item?.inStock && { color: '#eee' },
+                    ]}
+                  >
+                    Add
+                  </Text>
                 </TouchableOpacity>
-              </View>
+              ) : (
+                <View style={styles.counterContainer}>
+                  <TouchableOpacity
+                    style={styles.counterButton}
+                    onPress={() => {
+                      if (quantity === 1) {
+                        dispatch(removeFromCart(item));
+                      } else {
+                        handleDecrement(item);
+                      }
+                    }}
+                  >
+                    <Text style={styles.counterText}>-</Text>
+                  </TouchableOpacity>
+
+                  <Text style={styles.counterValue}>{quantity}</Text>
+
+                  <TouchableOpacity
+                    style={styles.counterButton}
+                    onPress={() => {
+                      handleIncrement(item);
+                    }}
+                  >
+                    <Text style={styles.counterText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           </ScrollView>
         </View>
@@ -406,6 +483,35 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     fontSize: 18,
     alignSelf: 'center',
+  },
+  counterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1.5,
+    borderColor: '#d63333ff',
+    borderRadius: 4,
+  },
+  counterButton: {
+    padding: 8,
+    borderRadius: 4,
+    backgroundColor: '#f8f8f8',
+    borderColor: '#d63333ff',
+    borderWidth: 1,
+    paddingHorizontal: 20,
+  },
+  counterText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#d63333ff',
+  },
+  counterValue: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginHorizontal: 12,
   },
 });
 
