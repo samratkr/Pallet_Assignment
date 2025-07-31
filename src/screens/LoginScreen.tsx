@@ -23,7 +23,7 @@ const LoginScreen: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<NavigationProp>();
   const user = useSelector((state: RootState) => state?.auth?.user);
-
+  console.log(user, 'I got the user');
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
@@ -35,9 +35,22 @@ const LoginScreen: React.FC = () => {
 
   const signInWithGoogle = async () => {
     try {
-      // await GoogleSignin.hasPlayServices();
-      // const userInfo = await GoogleSignin.signIn();
-      // dispatch(setUser(userInfo?.user));
+      await GoogleSignin.hasPlayServices();
+
+      // Sign in directly
+      const userInfo = await GoogleSignin.signIn();
+      console.log('Google user info:', userInfo, 'Google user info');
+
+      if (userInfo?.data?.user) {
+        dispatch(setUser(userInfo?.data?.user));
+      } else {
+        Alert.alert(
+          'Error',
+          'Failed to retrieve user info from Google Sign-In.',
+        );
+        return;
+      }
+
       const getProducts = await dispatch(
         GetProductApiHelper({
           page: '1',
@@ -45,12 +58,15 @@ const LoginScreen: React.FC = () => {
           storeLocationId: 'RLC_83',
         }),
       );
+
       if (getProducts?.meta?.requestStatus === 'fulfilled') {
         navigation.navigate('ProductList');
       } else {
-        console.error('API failed');
+        console.error('Product API failed');
       }
     } catch (error: any) {
+      console.error('Google Sign-In Error:', error);
+
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         Alert.alert('Cancelled', 'Google Sign-In was cancelled.');
       } else if (error.code === statusCodes.IN_PROGRESS) {
@@ -58,8 +74,10 @@ const LoginScreen: React.FC = () => {
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         Alert.alert('Error', 'Play services not available or outdated.');
       } else {
-        Alert.alert('Error', 'Something went wrong during sign-in.');
-        console.error('Google Sign-In Error:', error);
+        Alert.alert(
+          'Sign-In Error',
+          error.message || 'Something went wrong during sign-in.',
+        );
       }
     }
   };
@@ -67,10 +85,12 @@ const LoginScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       {loading && <Loader />}
-      {/* <Image source={require('../assets/logo.png')} style={styles.logo} /> */}
-      {user?.name && <Text style={styles.title}>{user?.name}</Text>}
+      {user?.givenName && (
+        <Text style={styles.title}>Hi, {user?.givenName}</Text>
+      )}
       <Text style={styles.title}>Welcome to Pallet Shop</Text>
       <Text style={styles.subtitle}>Sign in with Google to get started</Text>
+
       <Pressable style={styles.googleButton} onPress={signInWithGoogle}>
         <Image
           source={require('../../assets/images/google-Icon.png')}

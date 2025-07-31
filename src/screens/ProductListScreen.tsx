@@ -85,7 +85,7 @@ const ProductListScreen = () => {
     <View style={styles.mainContainer}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>
-          {user?.name ? user.name + `'s ` : ''}Pallet Shop
+          {user?.givenName ? user.givenName + `'s ` : ''}Pallet Shop
         </Text>
         <View style={styles.topButtons}>
           <TouchableOpacity onPress={handlePrevious} style={styles.iconButton}>
