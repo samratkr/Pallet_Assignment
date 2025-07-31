@@ -41,7 +41,7 @@ const LoginScreen: React.FC = () => {
       const getProducts = await dispatch(
         GetProductApiHelper({
           page: '1',
-          pageSize: '10',
+          pageSize: '5',
           storeLocationId: 'RLC_83',
         }),
       );
