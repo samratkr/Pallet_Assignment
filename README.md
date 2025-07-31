@@ -11,11 +11,8 @@ First, you will need to run **Metro**, the JavaScript build tool for React Nativ
 To start the Metro dev server, run the following command from the root of your React Native project:
 
 ```sh
-# Using npm
-npm start
+npx react-native run-android # For Android / Windows
 
-# OR using Yarn
-yarn start
 ```
 
 ## Step 2: Build and run your app
